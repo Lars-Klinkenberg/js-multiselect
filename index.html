@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="multiselect.js"></script>
+  </head>
+  <body>
+    <h1>JS-Multiselect</h1>
+
+    <div id="multiselect"></div>
+
+    <template id="multiselect-template">
+      <div data-template="multiselect-container">
+        <div data-template="multiselect-selectedOptionsContainer"></div>
+        <select
+          data-template="multiselect-optionContainer"
+          name=""
+          id=""
+        >
+        <option data-template="placeholder" disabled selected
+           ></option>
+          <option value="all">Select all</option>
+        </select>
+      </div>
+    </template>
+
+    <!-- <template id="multiselect-option-template">
+      <option data-template="multiselect-option" value=""></option>
+    </template> -->
+
+    <script>
+      /*const selectElement = document.querySelector("select[multiple]");
+      selectElement.addEventListener("change", () => {
+        const selectedOptions = Array.from(selectElement.selectedOptions).map(
+          (option) => option.value
+        );
+        console.log(selectedOptions);
+      });
+*/
+      const options = [
+        { value: "option1", text: "Option 1", selected: true },
+        { value: "option2", text: "Option 2", selected: false },
+        { value: "option3", text: "Option 3", selected: true },
+        { value: "option4", text: "Option 4", selected: true },
+        { value: "option5", text: "Option 5", selected: false },
+        { value: "option6", text: "Option 6", selected: false },
+        { value: "option7", text: "Option 7", selected: false },
+        { value: "option8", text: "Option 8", selected: false },
+        { value: "option9", text: "Option 9", selected: false },
+        { value: "option10", text: "Option 10", selected: false },
+      ];
+
+      const multiselect = new Multiselect({
+        parentContainer: document.getElementById("multiselect"),
+        options: options,
+        placeholder: "Select options",
+      }
+      );
+    </script>
+  </body>
+</html>
