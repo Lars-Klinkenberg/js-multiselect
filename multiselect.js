@@ -8,34 +8,87 @@ class Option {
 
 class Multiselect {
   selectedOptions = [];
+  template = {
+    parentContainer: null,
+    selectContainer: null,
+    placeholderContainer: null,
+    inputContainer: null,
+    selectOptionsContainer: null,
+    maxSelectedContainer: null,
+  };
 
-  constructor(config) {
-    this.parentContainer = config.parentContainer;
-    this.options = config.options;
-    this.placeholder = config.placeholder;
-    this.init();
+  constructor(element, config = {}) {
+    let defaults = {
+      placeholder: "Select item(s)",
+      max: null,
+      search: true,
+      selectAll: true,
+      listAll: true,
+      closeListOnItemSelect: false,
+      name: "",
+      width: "",
+      height: "",
+      dropdownWidth: "",
+      dropdownHeight: "",
+      data: [],
+      onChange: function () {},
+      onSelect: function () {},
+      onUnselect: function () {},
+    };
+    this.config = Object.assign(defaults, config);
+    this.selectElement =
+      typeof element === "string" ? document.querySelector(element) : element;
+
+    this.name = this.selectElement.getAttribute("name")
+      ? this.selectElement.getAttribute("name")
+      : "multi-select-" + Math.floor(Math.random() * 1000000);
+
+    if (!this.config.data.length) {
+      let options = this.selectElement.querySelectorAll("option");
+      options.forEach((option) => {
+        this.config.data.push({
+          value: option.value,
+          text: option.innerHTML,
+          selected: option.selected,
+          html: option.getAttribute("data-html"),
+        });
+      });
+    }
+
+    console.log("this ", this);
+    this.initTemplate();
   }
 
-  init() {
+  initTemplate() {
     console.log("Multiselect initialized in", this.parentContainer);
-    this.template = this.loadTemplate();
-    this.selectedOptionsContainer = this.template.querySelector(
-      '[data-template="multiselect-selectedOptionsContainer"]'
+    this.template.parentContainer = this.loadTemplate();
+
+    this.template.maxSelectedContainer = this.template.parentContainer.querySelector(
+      ".multi-select-header-max"
     );
-    this.selectContainer = this.template.querySelector(
-      '[data-template="multiselect-optionContainer"]'
+    if (this.template.maxSelectedContainer) {
+      this.template.maxSelectedContainer.textContent = this.maxSelectedText;
+    }
+
+    this.template.placeholderContainer = this.template.parentContainer.querySelector(
+      ".multi-select-header-placeholder"
     );
-    this.placeholderContainer = this.selectContainer.querySelector(
-      '[data-template="placeholder"]'
+    if (this.template.placeholderContainer) {
+      this.template.placeholderContainer.textContent = this.config.placeholder;
+    }
+
+    this.template.selectOptionsContainer = this.template.parentContainer.querySelector(
+      ".multi-select-options"
     );
-    this.placeholderContainer.textContent =
-      this.placeholder || "Select options";
-    this.initializeOptions();
-    this.selectContainer.addEventListener(
-      "change",
-      this.selectChangeHandler.bind(this)
-    );
-    this.parentContainer.appendChild(this.template);
+    if (this.template.selectOptionsContainer) {
+        if(this.config.selectAll) {
+            this.template.selectOptionsContainer.innerHTML = this.selectAllHtml;
+        }
+        this.template.selectOptionsContainer.innerHTML += this.optionsHtml;
+    }
+
+    console.log("Template loaded", this.template);
+    this.selectElement.replaceWith(this.template.parentContainer);
   }
 
   loadTemplate() {
@@ -44,54 +97,29 @@ class Multiselect {
       .content.cloneNode(true);
   }
 
-  createOption(value, text, selected = false) {
-    const option = document.createElement("option");
-    option.value = value;
-    option.dataset.value = value;
-    option.dataset.selected = selected;
-
-    // const checkbox = document.createElement("input");
-    // checkbox.type = "radio";
-    // checkbox.selected = selected;
-
-    const label = document.createElement("span");
-    label.textContent = text;
-
-    // option.appendChild(checkbox);
-    option.appendChild(label);
-    return option;
-  }
-
-  initializeOptions() {
-    this.options.forEach((option) => {
-      const optionElement = this.createOption(
-        option.value,
-        option.text,
-        option.selected
-      );
-      this.selectContainer.appendChild(optionElement);
+  get optionsHtml() {
+    let html = "";
+    this.config.data.forEach((item) => {
+      html += `
+        <div class="multi-select-option}" data-value="${item.value}">
+            <span class="multi-select-option-radio"></span>
+                <span class="multi-select-option-text">
+                    ${item.html ? item.html : item.text}
+                </span>
+        </div>`;
     });
+    return html;
   }
 
-  selectChangeHandler(event) {
-    console.log(event);
-    let selected = Array.from(this.selectContainer.selectedOptions);
-
-    
-    if(selected[0].value === "all") {
-        selected = Array.from(this.selectContainer.options).filter(
-          (option) => option.value !== "all"
-        );
-    }
-    this.selectedOptions.push(...selected.map((option) => option.value));
-    console.log("Selected options:", this.selectedOptions);
-    this.resetSelectedOptions();
+  get selectAllHtml(){
+    return `<div class="multi-select-all">
+                <span class="multi-select-option-radio"></span>
+                <span class="multi-select-option-text">Select all</span>
+            </div>`;
   }
 
-  resetSelectedOptions() {
-    Array.from(this.selectContainer.selectedOptions).forEach((option) => {
-      option.selected = false;
-    });
-    this.placeholderContainer.selected = true;
+  get maxSelectedText() {
+    if (!this.config.max) return "";
+    return (this.selectedValues?.length || "0") + "/" + this.config.max;
   }
 }
