@@ -15,6 +15,7 @@
     <template id="multiselect-template">
       <div class="multi-select">
                 <!-- ${this.selectedValues.map(value => `<input type="hidden" name="${this.name}[]" value="${value}">`).join('')} -->
+                 <div class="multi-select-values"></div>
                 <div class="multi-select-header">
                     <span class="multi-select-header-max">
                         <!-- ${this.options.max ? this.selectedValues.length + '/' + this.options.max : ''} -->
