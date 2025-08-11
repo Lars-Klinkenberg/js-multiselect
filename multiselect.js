@@ -22,7 +22,7 @@ class Multiselect {
       placeholder: "Select item(s)",
       max: null,
       search: true,
-      selectAll: true,
+      selectAll: false,
       listAll: true,
       closeListOnItemSelect: false,
       name: "",
@@ -55,13 +55,11 @@ class Multiselect {
       });
     }
 
-    console.log("this ", this);
     this.initTemplate();
     this.addEventListeners();
   }
 
   initTemplate() {
-    console.log("Multiselect initialized in", this.parentContainer);
     this.template.parentContainer = this.loadTemplate();
     this.template.parentContainer.id = this.name;
 
@@ -89,7 +87,6 @@ class Multiselect {
       this.template.selectOptionsContainer.innerHTML += this.optionsHtml;
     }
 
-    console.log("Template loaded", this.template.parentContainer);
     this.selectElement.replaceWith(this.template.parentContainer);
   }
 
@@ -130,15 +127,17 @@ class Multiselect {
   }
 
   addEventListeners() {
-    console.log("addEventlisteneres", this.template);
     this.template.selectOptionsContainer.childNodes.forEach((option) => {
       option.addEventListener("click", (event) => {
         this.optionClick(event, option);
       });
     });
-    console.log("Event listeners added ", this.name);
     document.getElementById(this.name)?.addEventListener("click", (event) => {
       console.log("Parent container clicked", event);
+      if (event.target.dataset.click == "remove-selected-item") {
+        this.removeSelectedItem(event.target.dataset.value);
+        return;
+      }
       if (!event.target.classList.contains("multi-select-header")) return;
       let header = event.target;
 
@@ -151,8 +150,6 @@ class Multiselect {
   }
 
   optionClick(event, option) {
-    console.log("Option clicked", option.dataset.value, this.selectedItems);
-
     // select all functionality
     if (option.dataset.value === "select-all") {
       if (this.selectedItems.length === this.config.data.length) {
@@ -172,9 +169,9 @@ class Multiselect {
     }
 
     if (this.selectedItems.includes(option.dataset.value)) {
-      console.warn("Unselecting item", option.dataset.value, this.selectedItems);
-      this.selectedItems = this.selectedItems.filter((item) => item !== option.dataset.value);
-      console.warn("Unselecting item", option.dataset.value, this.selectedItems);
+      this.selectedItems = this.selectedItems.filter(
+        (item) => item !== option.dataset.value
+      );
       option.classList.remove("multi-select-selected");
       this.template.maxSelectedContainer.textContent = this.maxSelectedText;
       this.toggleDisabledOptions();
@@ -183,7 +180,6 @@ class Multiselect {
     }
 
     if (this.config.max && this.selectedItems.length >= this.config.max) {
-      console.warn("Max selection limit reached");
       this.toggleDisabledOptions();
       return;
     }
@@ -198,24 +194,56 @@ class Multiselect {
     this.toggleDisabledOptions();
   }
 
-  updateSelectedItems() {
-    console.error("Updating selected items", this.selectedItems);
-    let html = this.selectedItems
-      .map(
-        (value) => `<span  class="multi-select-header-option">${value}</span>`
-      )
-      .join("");
-    console.log("Selected items HTML", html);
+  removeSelectedItem(value) {
+    if (!this.selectedItems.includes(value)) {
+      return;
+    }
+    this.selectedItems = this.selectedItems.filter((item) => item !== value);
+    this.updateSelectedItems();
+    this.toggleDisabledOptions();
+    this.updateOptionList();
+  }
 
-    console.log("Max selected text", this.template.headerPlaceholderContainer);
+  updateOptionList() {
+    this.template.selectOptionsContainer.childNodes.forEach((option) => {
+      if (!option.dataset) return;
+      if (!this.selectedItems.includes(option.dataset.value)) {
+        option.classList.remove("multi-select-selected");
+      }
+    });
+  }
+
+  updateSelectedItems() {
+    let html = this.selectedItems
+      .map((value) => {
+        // `<span  class="multi-select-header-option">${value}</span>`
+        let optionContainer = document.createElement("span");
+        optionContainer.className = "multi-select-header-option";
+        optionContainer.textContent = value;
+        optionContainer.setAttribute("data-value", value);
+        optionContainer.setAttribute("data-click", "remove-selected-item");
+        let removeButton = document.createElement("button");
+        removeButton.className = "multi-select-header-option-remove";
+        removeButton.innerHTML = "&times;";
+        removeButton.setAttribute("data-click", "remove-selected-item");
+        removeButton.setAttribute("data-value", value);
+        removeButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          this.removeSelectedItem(value);
+        });
+        optionContainer.appendChild(removeButton);
+
+        return optionContainer.outerHTML;
+      })
+      .join("");
 
     this.template.maxSelectedContainer.textContent = this.maxSelectedText;
     this.template.headerPlaceholderContainer.innerHTML = html;
   }
 
   disableNonSelectedOptions() {
-    console.log("Disabling non-selected options");
     this.template.selectOptionsContainer.childNodes.forEach((option) => {
+      if (!option.dataset) return;
       if (!this.selectedItems.includes(option.dataset.value)) {
         option.classList.add("multi-select-disabled");
       } else {
@@ -225,9 +253,8 @@ class Multiselect {
   }
 
   enableAllOptions() {
-    console.log("Enabling all options");
     this.template.selectOptionsContainer.childNodes.forEach((option) => {
-      option.classList.remove("multi-select-disabled");
+      option?.classList?.remove("multi-select-disabled");
     });
   }
 

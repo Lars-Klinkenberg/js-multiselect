@@ -190,3 +190,12 @@
     opacity: 0.5;
     
 }
+
+
+.multi-select-header-option-remove{
+    border: none;
+    background: none;
+    color: #65727e;
+    margin-left: 2px;
+    cursor: pointer;
+}
