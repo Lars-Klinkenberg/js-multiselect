@@ -105,7 +105,7 @@ class Multiselect {
       option.setAttribute("data-value", item.value);
       option.setAttribute("data-text", item.text);
       option.setAttribute("data-disabled", item.disabled);
-      if(item.disabled) {
+      if (item.disabled) {
         option.classList.add("multi-select-disabled");
       }
       option.innerHTML = `
@@ -188,7 +188,6 @@ class Multiselect {
       return;
     }
 
-    this.addEventListeners
     this.addSelectedItem(option.dataset.value, option.dataset.text);
     this.template.maxSelectedContainer.textContent = this.maxSelectedText;
     if (!option.classList.contains("multi-select-selected")) {
@@ -200,17 +199,19 @@ class Multiselect {
 
   isSelected(key) {
     return this.selectedItems.some((item) => item.key === key);
-  };
+  }
 
   addSelectedItem(key, value) {
-     this.selectedItems.push({ "key": key, "value": value });
+    this.selectedItems.push({ key: key, value: value });
   }
 
   removeSelectedItem(value) {
-    if(!this.isSelected(value)) {
+    if (!this.isSelected(value)) {
       return;
     }
-    this.selectedItems = this.selectedItems.filter((item) => item.key !== value);
+    this.selectedItems = this.selectedItems.filter(
+      (item) => item.key !== value
+    );
     this.updateSelectedItems();
     this.toggleDisabledOptions();
     this.updateOptionList();
@@ -256,10 +257,11 @@ class Multiselect {
   disableNonSelectedOptions() {
     this.template.selectOptionsContainer.childNodes.forEach((option) => {
       if (!option.dataset) return;
+      if (this.isSelected(option.dataset.value)) return;
       if (!this.selectedItems.includes(option.dataset.value)) {
         option.classList.add("multi-select-disabled");
       } else {
-        if( option.dataset?.disabled) return;
+        if (option.dataset?.disabled) return;
         option.classList.remove("multi-select-disabled");
       }
     });
@@ -267,7 +269,9 @@ class Multiselect {
 
   enableAllOptions() {
     this.template.selectOptionsContainer.childNodes.forEach((option) => {
-      if(option.dataset?.disabled) return;
+      let isDisabled = option.dataset?.disabled === "true";
+      if (isDisabled) return;
+
       option?.classList?.remove("multi-select-disabled");
     });
   }
