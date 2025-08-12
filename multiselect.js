@@ -105,9 +105,16 @@ class Multiselect {
       option.setAttribute("data-value", item.value);
       option.setAttribute("data-text", item.text);
       option.setAttribute("data-disabled", item.disabled);
+      option.setAttribute("data-selected", item.selected);
       if (item.disabled) {
         option.classList.add("multi-select-disabled");
       }
+
+      if(item.selected) {
+        option.classList.add("multi-select-selected");
+        this.addSelectedItem(item.value, item.text);
+      }
+      
       option.innerHTML = `
             <span class="multi-select-option-radio"></span>
             <span class="multi-select-option-text">
