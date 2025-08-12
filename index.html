@@ -10,8 +10,6 @@
   <body>
     <h1>JS-Multiselect</h1>
 
-    <div id="multiselect"></div>
-
     <template id="multiselect-template">
       <div class="multi-select">
                 <!-- ${this.selectedValues.map(value => `<input type="hidden" name="${this.name}[]" value="${value}">`).join('')} -->
@@ -28,7 +26,7 @@
     </template>
 
     <select id="fruits" name="fruits" data-placeholder="Select fruits" multiple data-multi-select>
-        <option value="Apple">Apple</option>
+        <option value="Apple" disabled>Apple</option>
         <option value="Banana">Banana</option>
         <option value="Blackberry">Blackberry</option>
         <option value="Blueberry">Blueberry</option>

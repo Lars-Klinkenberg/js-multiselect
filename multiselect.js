@@ -50,6 +50,7 @@ class Multiselect {
           value: option.value,
           text: option.innerHTML,
           selected: option.selected,
+          disabled: option.disabled,
           html: option.getAttribute("data-html"),
         });
       });
@@ -102,6 +103,10 @@ class Multiselect {
       let option = document.createElement("div");
       option.className = "multi-select-option";
       option.setAttribute("data-value", item.value);
+      option.setAttribute("data-disabled", item.disabled);
+      if(item.disabled) {
+        option.classList.add("multi-select-disabled");
+      }
       option.innerHTML = `
             <span class="multi-select-option-radio"></span>
             <span class="multi-select-option-text">
@@ -247,6 +252,7 @@ class Multiselect {
       if (!this.selectedItems.includes(option.dataset.value)) {
         option.classList.add("multi-select-disabled");
       } else {
+        if( option.dataset?.disabled) return;
         option.classList.remove("multi-select-disabled");
       }
     });
@@ -254,6 +260,7 @@ class Multiselect {
 
   enableAllOptions() {
     this.template.selectOptionsContainer.childNodes.forEach((option) => {
+      if(option.dataset?.disabled) return;
       option?.classList?.remove("multi-select-disabled");
     });
   }
