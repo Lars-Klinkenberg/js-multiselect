@@ -11,6 +11,7 @@ class Multiselect {
   template = {
     parentContainer: null,
     selectContainer: null,
+    headerContainer: null,
     headerPlaceholderContainer: null,
     inputContainer: null,
     selectOptionsContainer: null,
@@ -70,6 +71,8 @@ class Multiselect {
       this.template.maxSelectedContainer.textContent = this.maxSelectedText;
     }
 
+
+    this.template.headerContainer = this.template.parentContainer.querySelector(".multi-select-header");
     this.template.headerPlaceholderContainer =
       this.template.parentContainer.querySelector(
         ".multi-select-header-placeholder"
@@ -110,11 +113,13 @@ class Multiselect {
         option.classList.add("multi-select-disabled");
       }
 
-      if(item.selected) {
+      if (item.selected) {
         option.classList.add("multi-select-selected");
         this.addSelectedItem(item.value, item.text);
+        this.updateSelectedItems();
+        this.template.maxSelectedContainer.textContent = this.maxSelectedText;
       }
-      
+
       option.innerHTML = `
             <span class="multi-select-option-radio"></span>
             <span class="multi-select-option-text">
@@ -151,18 +156,18 @@ class Multiselect {
         this.removeSelectedItem(event.target.dataset.value);
         return;
       }
-      if (!event.target.classList.contains("multi-select-header")) return;
-      let header = event.target;
-
-      if (header.classList.contains("multi-select-header-active")) {
-        header.classList.remove("multi-select-header-active");
+        
+      if (this.template.headerContainer.classList.contains("multi-select-header-active")) {
+        this.template.headerContainer.classList.remove("multi-select-header-active");
       } else {
-        header.classList.add("multi-select-header-active");
+        this.template.headerContainer.classList.add("multi-select-header-active");
       }
     });
   }
 
   optionClick(event, option) {
+    event.stopPropagation();
+    event.preventDefault();
     // select all functionality
     if (option.dataset.value === "select-all") {
       // if (this.selectedItems.length === this.config.data.length) {
@@ -257,8 +262,12 @@ class Multiselect {
       })
       .join("");
 
-    this.template.maxSelectedContainer.textContent = this.maxSelectedText;
-    this.template.headerPlaceholderContainer.innerHTML = html;
+      this.template.maxSelectedContainer.textContent = this.maxSelectedText;
+      this.template.headerPlaceholderContainer.innerHTML = html;
+      if (this.selectedItems.length === 0) {
+         this.template.headerPlaceholderContainer.innerHTML =
+        this.config.placeholder;
+      }
   }
 
   disableNonSelectedOptions() {
